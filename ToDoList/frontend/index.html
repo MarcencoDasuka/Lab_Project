@@ -212,6 +212,15 @@
             transition: all 0.2s;
         }
 
+        .btn-email {
+            background: #9c27b0;
+            color: white;
+        }
+
+        .btn-email:hover {
+            background: #7b1fa2;
+        }
+
         .btn-view {
             background: #17a2b8;
             color: white;
@@ -545,6 +554,13 @@
             deleteBtn.className = 'btn-delete';
             deleteBtn.onclick = () => deleteTask(task.id);
             actionsCell.appendChild(deleteBtn);
+
+            const emailBtn = document.createElement('button');
+            emailBtn.textContent = '📧 Отправить';
+            emailBtn.className = 'btn-email';
+            emailBtn.onclick = () => sendTaskByEmail(task.id);
+            actionsCell.appendChild(emailBtn);
+
         });
     }
 
@@ -692,6 +708,37 @@
 
     function closeModal() {
         document.getElementById('detailsModal').style.display = 'none';
+    }
+    async function sendTaskByEmail(id) {
+        const email = prompt('Введите email для отправки задачи:', 'imarchenko993@gmail.com');
+
+        if (!email) return;
+
+        if (!email.includes('@') || !email.includes('.')) {
+            alert('Введите корректный email');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/${id}/send-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(`${result.message}`);
+            } else {
+                alert(`${result.error}`);
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Ошибка подключения к серверу');
+        }
     }
 
     window.onclick = function(event) {
