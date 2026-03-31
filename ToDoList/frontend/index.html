@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo List Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .stat-card {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .completed-row {
+            background: #d4edda;
+            opacity: 0.8;
+        }
+
+        .completed-row:hover {
+            background: #c3e6cb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-pending {
+            background: #ffc107;
+            color: #333;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin: 0 4px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #138496;
+            transform: scale(1.05);
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-edit:hover {
+            background: #e0a800;
+            transform: scale(1.05);
+        }
+
+        .btn-toggle {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-toggle:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .btn-undo {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-undo:hover {
+            background: #5a6268;
+            transform: scale(1.05);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 0;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .close:hover {
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: #333;
+            word-break: break-word;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            button {
+                margin: 2px;
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+
+            td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1> ToDo List Manager</h1>
+        <p>Управляй своими задачами эффективно</p>
+    </div>
+
+    <div class="content">
+        <div class="form-section">
+            <div class="form-group">
+                <label> Название задачи</label>
+                <input type="text" id="title" placeholder="Введите название задачи...">
+            </div>
+            <div class="form-group">
+                <label> Описание</label>
+                <textarea id="description" placeholder="Введите описание задачи..."></textarea>
+            </div>
+            <button class="btn-add" onclick="addTask()">➕ Добавить задачу</button>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTasks">0</div>
+                <div class="stat-label">Всего задач</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedTasks">0</div>
+                <div class="stat-label">Выполнено</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingTasks">0</div>
+                <div class="stat-label">В работе</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody id="taskList">
+                <tr>
+                    <td colspan="5" style="text-align: center;">Загрузка задач...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2> Детали задачи</h2>
+            <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="detail-item">
+                <div class="detail-label">ID задачи</div>
+                <div class="detail-value" id="detailId"></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Название</div>
+                <div class="detail-value" id="detailTitle"></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Описание</div>
+                <div class="detail-value" id="detailDescription"></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Статус</div>
+                <div class="detail-value" id="detailStatus"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8081/CRUD';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTasks();
+    });
+
+    async function loadTasks() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error('Ошибка загрузки');
+            const tasks = await response.json();
+            displayTasks(tasks);
+            updateStats(tasks);
+        } catch (error) {
+            console.error('Ошибка:', error);
+            document.getElementById('taskList').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">❌ Ошибка подключения к серверу</td></tr>';
+        }
+    }
+
+    function displayTasks(tasks) {
+        const taskList = document.getElementById('taskList');
+
+        if (!tasks || tasks.length === 0) {
+            taskList.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 60px;">
+                        <div class="empty-state">
+                             Нет задач<br>
+                            <small>Добавьте первую задачу!</small>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        taskList.innerHTML = '';
+
+        tasks.forEach(task => {
+            const row = taskList.insertRow();
+            if (task.completed) {
+                row.classList.add('completed-row');
+            }
+
+            row.insertCell(0).textContent = task.id;
+            row.insertCell(1).innerHTML = task.completed ? `<s>${task.title}</s>` : task.title;
+            row.insertCell(2).innerHTML = task.description ? (task.completed ? `<s>${task.description.substring(0, 50)}</s>` : task.description.substring(0, 50)) : '-';
+
+            const statusCell = row.insertCell(3);
+            statusCell.innerHTML = task.completed
+                ? '<span class="status-badge status-completed">✓ Выполнена</span>'
+                : '<span class="status-badge status-pending">○ В работе</span>';
+
+            const actionsCell = row.insertCell(4);
+
+            const viewBtn = document.createElement('button');
+            viewBtn.textContent = ' Просмотр';
+            viewBtn.className = 'btn-view';
+            viewBtn.onclick = () => viewTask(task.id);
+            actionsCell.appendChild(viewBtn);
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Ред.';
+            editBtn.className = 'btn-edit';
+            editBtn.onclick = () => editTask(task.id);
+            actionsCell.appendChild(editBtn);
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.textContent = task.completed ? '↺ Отменить' : '✓ Выполнить';
+            toggleBtn.className = task.completed ? 'btn-undo' : 'btn-toggle';
+            toggleBtn.onclick = () => toggleTaskStatus(task.id, task.completed);
+            actionsCell.appendChild(toggleBtn);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = ' Удалить';
+            deleteBtn.className = 'btn-delete';
+            deleteBtn.onclick = () => deleteTask(task.id);
+            actionsCell.appendChild(deleteBtn);
+        });
+    }
+
+    function updateStats(tasks) {
+        const total = tasks.length;
+        const completed = tasks.filter(t => t.completed).length;
+        const pending = total - completed;
+
+        document.getElementById('totalTasks').textContent = total;
+        document.getElementById('completedTasks').textContent = completed;
+        document.getElementById('pendingTasks').textContent = pending;
+    }
+
+    async function addTask() {
+        const title = document.getElementById('title').value.trim();
+        const description = document.getElementById('description').value.trim();
+
+        if (!title) {
+            alert(' Введите название задачи');
+            return;
+        }
+
+        const task = {
+            title: title,
+            description: description,
+            completed: false
+        };
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(task)
+            });
+
+            if (response.ok) {
+                document.getElementById('title').value = '';
+                document.getElementById('description').value = '';
+                loadTasks();
+            } else {
+                alert(' Ошибка добавления задачи');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert(' Ошибка подключения к серверу');
+        }
+    }
+
+    async function viewTask(id) {
+        try {
+            const response = await fetch(`${API_URL}/${id}`);
+            const task = await response.json();
+
+            document.getElementById('detailId').textContent = task.id;
+            document.getElementById('detailTitle').textContent = task.title;
+            document.getElementById('detailDescription').textContent = task.description || 'Нет описания';
+            document.getElementById('detailStatus').innerHTML = task.completed
+                ? '<span class="status-badge status-completed">✓ Выполнена</span>'
+                : '<span class="status-badge status-pending">○ Не выполнена</span>';
+
+            document.getElementById('detailsModal').style.display = 'block';
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert(' Ошибка загрузки деталей');
+        }
+    }
+
+    async function editTask(id) {
+        const newTitle = prompt('️ Введите новое название:');
+        if (!newTitle) return;
+
+        const newDescription = prompt(' Введите новое описание:');
+        const newStatus = confirm(' Отметить как выполненную?\n\nНажмите OK для выполнения, Cancel для отмены');
+
+        const updatedTask = {
+            title: newTitle,
+            description: newDescription || '',
+            completed: newStatus
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedTask)
+            });
+
+            if (response.ok) {
+                loadTasks();
+            } else {
+                alert(' Ошибка редактирования');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert(' Ошибка подключения к серверу');
+        }
+    }
+
+    async function toggleTaskStatus(id, currentStatus) {
+        try {
+            const response = await fetch(`${API_URL}/${id}`);
+            const task = await response.json();
+
+            const updatedTask = {
+                title: task.title,
+                description: task.description,
+                completed: !currentStatus
+            };
+
+            const updateResponse = await fetch(`${API_URL}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedTask)
+            });
+
+            if (updateResponse.ok) {
+                loadTasks();
+            } else {
+                alert(' Ошибка изменения статуса');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert(' Ошибка подключения к серверу');
+        }
+    }
+
+    async function deleteTask(id) {
+        if (confirm(' Вы уверены, что хотите удалить эту задачу?')) {
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadTasks();
+                } else {
+                    alert(' Ошибка удаления задачи');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert(' Ошибка подключения к серверу');
+            }
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('detailsModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('detailsModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

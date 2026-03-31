@@ -1,54 +1,49 @@
 package com.example.ToDoList.controller;
 
 import com.example.ToDoList.model.ToDoItem;
+import com.example.ToDoList.repository.ToDoListRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @RequestMapping("/CRUD")
+@CrossOrigin(origins = "*")
 public class ToDoListController {
 
-    private List<ToDoItem> listOfItems = new ArrayList<>();
-    private AtomicInteger id = new AtomicInteger();
+    @Autowired
+    private ToDoListRepo repository;
 
-
-    @PostMapping()
-    public ToDoItem createItem(@RequestBody ToDoItem toDoItem){
-        toDoItem.setId(id.getAndIncrement());
-        listOfItems.add(toDoItem);
-        return toDoItem;
+    @PostMapping
+    public ToDoItem createItem(@RequestBody ToDoItem item) {
+        item.setId(null);
+        return repository.save(item);
     }
 
-    @GetMapping()
-    public List<ToDoItem> getAllItems (){
-        return listOfItems;
+    @GetMapping
+    public List<ToDoItem> getAllItems() {
+        return repository.findAll();
     }
 
     @GetMapping("/{id}")
-    public ToDoItem getItem (@PathVariable Integer id){
-        return listOfItems.get(id);
+    public ToDoItem getItem(@PathVariable Integer id) {
+        return repository.findById(id).orElseThrow(() ->
+                new RuntimeException("Task not found"));
     }
 
     @PutMapping("/{id}")
-    public ToDoItem updateItem (@PathVariable Integer id, @RequestBody ToDoItem updatedItem){
-        for (ToDoItem listOfItem : listOfItems) {
-            if (listOfItem.getId().equals(id)){
-                updatedItem.setId(id);
-                listOfItems.set(id, updatedItem);
-                return updatedItem;
-            }
-        }
-        return null;
+    public ToDoItem updateItem(@PathVariable Integer id, @RequestBody ToDoItem updated) {
+        ToDoItem existing = repository.findById(id).orElseThrow(() ->
+                new RuntimeException("Task not found"));
+        existing.setTitle(updated.getTitle());
+        existing.setDescription(updated.getDescription());
+        existing.setCompleted(updated.getCompleted());
+        return repository.save(existing);
     }
-
-
 
     @DeleteMapping("/{id}")
-    public void deleteItem (@PathVariable Integer id){
-         listOfItems.remove(id);
+    public void deleteItem(@PathVariable Integer id) {
+        repository.deleteById(id);
     }
-
 }
