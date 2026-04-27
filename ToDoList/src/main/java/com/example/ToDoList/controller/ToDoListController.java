@@ -5,6 +5,7 @@ import com.example.ToDoList.repository.ToDoListRepo;
 import com.example.ToDoList.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +22,15 @@ public class ToDoListController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     @PostMapping
     public ToDoItem createItem(@RequestBody ToDoItem item) {
-        return repository.save(item);
+        ToDoItem saved = repository.save(item);
+        // Отправляем всем клиентам через WebSocket
+        messagingTemplate.convertAndSend("/topic/tasks", Map.of("action", "CREATE", "data", saved));
+        return saved;
     }
 
     @GetMapping
@@ -44,12 +51,17 @@ public class ToDoListController {
         existing.setTitle(updated.getTitle());
         existing.setDescription(updated.getDescription());
         existing.setCompleted(updated.getCompleted());
-        return repository.save(existing);
+        ToDoItem saved = repository.save(existing);
+        // Отправляем всем клиентам через WebSocket
+        messagingTemplate.convertAndSend("/topic/tasks", Map.of("action", "UPDATE", "data", saved));
+        return saved;
     }
 
     @DeleteMapping("/{id}")
     public void deleteItem(@PathVariable Integer id) {
         repository.deleteById(id);
+        // Отправляем всем клиентам через WebSocket
+        messagingTemplate.convertAndSend("/topic/tasks", Map.of("action", "DELETE", "id", id));
     }
 
     @PostMapping("/{id}/send-email")

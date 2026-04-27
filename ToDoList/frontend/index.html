@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ToDo List Manager</title>
@@ -476,6 +478,34 @@
 </div>
 
 <script>
+    let stompClient = null;
+
+    function connectWebSocket() {
+        const socket = new SockJS('http://localhost:8081/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function(frame) {
+            console.log('WebSocket connected: ' + frame);
+
+            stompClient.subscribe('/topic/tasks', function(message) {
+                const update = JSON.parse(message.body);
+                console.log('Received update:', update);
+
+                // Обновляем список задач при любом изменении
+                loadTasks();
+            });
+        }, function(error) {
+            console.error('WebSocket connection error:', error);
+            // Попробуем переподключиться через 5 секунд
+            setTimeout(connectWebSocket, 5000);
+        });
+    }
+
+    // Подключаемся при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTasks();
+        connectWebSocket();
+    });
     const API_URL = 'http://localhost:8081/CRUD';
 
     document.addEventListener('DOMContentLoaded', () => {
